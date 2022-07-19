@@ -1,7 +1,7 @@
 <template>
-  <div class="select">
-    <div class="select__title" :style="{ backgroundColor: title.color, borderColor: title.color }" @click="openOptions"
-      data-action="open">
+  <form class="select">
+    <div class="select__title" tabindex="0" :style="{ backgroundColor: title.color, borderColor: title.color }"
+      @click="openOptions" @keydown.enter="openOptions" data-action="open">
       <input class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox"
         :style="{ borderColor: title.color }" :checked="checked" @change="changeCheckbox" />
       <p class="title--active" data-action="open">{{ title.label }}</p>
@@ -9,13 +9,14 @@
         <use href="@/images/sprite.svg#icon-arrow-down"></use>
       </svg>
     </div>
-    <form class="select__form" v-if="areOptionsVisible" @click="closeOptions">
-      <label class="select__label" v-for="option in options" :key="option.id" @click="selectOption(option)">
-        <input class="select__input" type="radio" :style="{ backgroundColor: option.color }" />
+    <ul class="select__list" role="select" tabindex="0" v-if="areOptionsVisible" @click="closeOptions">
+      <li class="select__item" tabindex="-1" v-for="(option, idx) in options" v-focus="idx === focusedOption"
+        :key="option.id" @click="selectOption(option)" @keydown="navigateByOptions(option, $event)">
+        <span class="item__color" type="radio" :style="{ backgroundColor: option.color }"></span>
         {{ option.label }}
-      </label>
-    </form>
-  </div>
+      </li>
+    </ul>
+  </form>
 </template>
 
 <script>
@@ -36,18 +37,21 @@ export default {
     return {
       title: this.select,
       areOptionsVisible: false,
-      checked: false
+      checked: false,
+      focusedOption: 0,
     }
   },
   methods: {
     toggleSelectVisible() {
       this.areOptionsVisible = !this.areOptionsVisible;
     },
-    openOptions(e) {
+    async openOptions(e) {
+      console.log(e.target.nextSibling.firstChild)
       if (e.target.type === "checkbox") {
         return;
       }
-      this.toggleSelectVisible();
+      await this.toggleSelectVisible();
+
       document.addEventListener("click", this.hideOptions);
     },
     closeOptions() {
@@ -72,6 +76,49 @@ export default {
         return;
       }
       this.closeOptions()
+    },
+    navigationBySelection() {
+      
+    },
+    navigateByOptions(option, event) {
+      switch (event.code) {
+        case "Enter":
+          this.selectOption(option);
+          break;
+        case "ArrowDown":
+          if (this.focusedOption === this.options.length - 1) {
+            this.focusedOption = 0;
+            return;
+          }
+          this.focusedOption = this.focusedOption + 1;
+          break;
+        case "ArrowUp":
+          if (this.focusedOption === 0) {
+            this.focusedOption = this.options.length - 1;
+            return;
+          }
+          this.focusedOption = this.focusedOption - 1;
+          break;
+        case "ArrowLeft":
+          this.focusedOption = 0;
+          break;
+        case "ArrowRight":
+          this.focusedOption = this.options.length - 1;
+          break;
+      
+        default:
+          break;
+      }
+    },
+  },
+  directives: {
+    focus: {
+      inserted: function (el, binding) {
+        if (binding.value) {
+          el.focus();
+        }
+        return;
+      }
     }
   },
 }
@@ -155,6 +202,7 @@ img {
 .title--active {
   margin-left: 32px;
   cursor: pointer;
+  pointer-events: none;
 }
 
 .title__icon {
@@ -166,38 +214,36 @@ img {
   rotate: 45deg;
 }
 
-.select__form {
-  width: 200px;
+.select__list {
+  min-width: 200px;
   position: absolute;
-  border: 1px solid gray;
+  /* border: 1px solid gray; */
   border-left: 3px solid gray;
   z-index: 12;
-  background-color: #fff;
+  background-color: #edecec;
 }
 
-.select__label {
+.select__item {
   display: flex;
   position: relative;
   padding: 8px;
   padding-left: 36px;
   cursor: pointer;
-
+  outline: none;
 }
 
-.select__label:hover,
-.select__label:focus {
+.select__item:hover,
+.select__item:focus {
   background-color: #5ee2ff;
 }
-.select__input{
-  position: absolute;
-  left: 8px;
-}
-.select__input::before {
+.item__color::before {
   content: "";
   position: absolute;
-  left: 0;
-  width: 13px;
-  height: 13px;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
   background-color: inherit;
 }
 </style>
