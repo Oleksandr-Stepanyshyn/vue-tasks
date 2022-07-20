@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <ProcessSelection :value="value" :options="options" :showCheckbox="showCheckbox"
-      @checkbox-checked="toggleChecked" @select="optionSelect" />
+    <ProcessSelection v-model="value" :options="options" :showCheckbox="showCheckbox" :minWidthList="200"
+      :maxWidthList="500" @checkbox-checked="toggleChecked" />
   </div>
 </template>
 
@@ -21,7 +21,6 @@ export default {
       ],
       showCheckbox: true,
       value: { id: 2, label: 'In process', color: '#fff700', checked: true },
-      title: null,
     }
   },
   methods: {
