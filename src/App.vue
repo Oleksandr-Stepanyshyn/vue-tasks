@@ -1,7 +1,10 @@
 <template>
   <div id="app">
-    <ProcessSelection v-model="value" :options="options" :showCheckbox="showCheckbox" :minWidthList="200"
-      :maxWidthList="500" @checkbox-checked="toggleChecked" />
+    <input type="text" style="marginBottom: 20px">
+    <div class="select__container">
+      <ProcessSelection v-model="value" :options="options" :showCheckbox="showCheckbox" :minWidthList="300"
+        :maxWidthList="500" @checkbox-checked="toggleChecked" />
+    </div>
   </div>
 </template>
 
@@ -15,8 +18,8 @@ export default {
       options: [
         { id: 1, label: 'Accepted', color: '#04ff00', checked: false },
         { id: 2, label: 'In process', color: '#fff700', checked: true },
-        { id: 3, label: 'Rejected Lorem ipsum dolor sit, amet consectetur adipisicing elit. Accusantium eligendi eveniet porro optio sed odio rem veniam debitis quia numquam.', color: '#ff1100', checked: false },
-        { id: 4, label: 'Postponed', color: '#00fffb', checked: true },
+        { id: 3, label: 'Rejected', color: '#ff1100', checked: false },
+        { id: 4, label: 'Postponed Lorem ipsum dolor sit, amet consectetur adipisicing elit. Accusantium eligendi eveniet porro optio sed odio rem veniam debitis quia numquam.', color: '#00fffb', checked: true },
         { id: 5, label: 'Returned', color: '#0015ff', checked: false },
       ],
       showCheckbox: true,
@@ -50,5 +53,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.select__container {
+  width: 250px;
+  text-align: center;
 }
 </style>

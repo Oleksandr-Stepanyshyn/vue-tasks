@@ -1,13 +1,19 @@
 <template>
   <form class="select">
-    <div class="select__title" tabindex="-1" :style="{ backgroundColor: value.color, borderColor: value.color }"
+    <div class="select__title" tabindex="0" :style="{ backgroundColor: value.color, borderColor: value.color }"
       @click="openOptions" @keydown.enter="openOptions" data-action="open">
-      <input class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox"
-        :style="{ borderColor: value.color }" @change="changeCheckbox" />
-      <p class="title--active">
+      <input id="checkbox" class="custom-checkbox" name="checkbox" type="checkbox" @change="changeCheckbox" />
+      <label class="checkbox__label" v-if="showCheckbox" for="checkbox">
+        <span class="checkbox__icon" :style="{ borderColor: value.color }">
+          <svg width="14" height="14">
+            <use href="@/images/sprite.svg#icon-check"></use>
+          </svg>
+        </span>
+      </label>
+      <p class="title__text">
         {{ value.label }}
       </p>
-      <svg class="title__icon" :class="{open: areOptionsVisible}" width="14" height="14">
+      <svg class="title__arrow" :class="{open: areOptionsVisible}" width="14" height="14">
         <use href="@/images/sprite.svg#icon-arrow-down"></use>
       </svg>
     </div>
@@ -202,10 +208,11 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 16px 0;
   font-style: 16px;
   text-align: start;
 
-  line-height: 3;
+  line-height: 1.5;
 
   border-left: 8px solid;
   background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8));
@@ -214,46 +221,51 @@ img {
 .custom-checkbox {
   position: absolute;
   top: 45%;
-  left: 4px;
+  left: 5px;
   transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
 }
-
-.custom-checkbox::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  width: 14px;
-  height: 14px;
-
-  border: 1px solid inherit;
-  border-radius: 2px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  background-color: #fff;
-}
-
-.custom-checkbox:checked::before {
-  background-image: url('@/images/check.png');
-}
-
-.title--active {
-  margin-left: 32px;
+.title__text {
+  width: 100%;
+  margin-left: 36px;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   pointer-events: none;
 }
 
-.title__icon {
+.checkbox__icon {
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 2px solid;
+  fill: #ffffff;
+  background-color: #ffffff;
+}
+
+.custom-checkbox:checked + .checkbox__label .checkbox__icon {
+  fill: #000000;
+}
+
+.title__arrow {
   margin-right: 12px;
   pointer-events: none;
   /* transition: all 0.3s ease-out; */
 }
 
-.title__icon.open {
+.title__arrow.open {
   transform: rotate(180deg);
 }
 
-.select__title:target .title__icon{
+.select__title:target .title__arrow{
   rotate: 45deg;
 }
 
