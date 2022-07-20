@@ -1,26 +1,32 @@
 <template>
-  <div class="select">
-    <div class="select__title" :style="{ backgroundColor: title.color, borderColor: title.color }" @click="openOptions"
-      data-action="open">
+  <form class="select">
+    <div class="select__title" tabindex="-1" :style="{ backgroundColor: title.color, borderColor: title.color }"
+      @click="openOptions" @keydown.enter="openOptions" data-action="open">
       <input class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox"
-        :style="{ borderColor: title.color }" :checked="checked" @change="changeCheckbox" />
-      <p class="title--active" data-action="open">{{ title.label }}</p>
+        :style="{ borderColor: title.color }" @change="changeCheckbox" />
+      <p class="title--active">{{ title.label }}</p>
       <svg class="title__icon" width="14" height="14">
         <use href="@/images/sprite.svg#icon-arrow-down"></use>
       </svg>
     </div>
-    <form class="select__form" v-if="areOptionsVisible" @click="closeOptions">
-      <label class="select__label" v-for="option in options" :key="option.id" @click="selectOption(option)">
-        <input class="select__input" type="radio" :style="{ backgroundColor: option.color }" />
+    <ul class="select__list" role="select" tabindex="0" v-if="areOptionsVisible" v-focus @click="closeOptions"
+      @keydown="navigateByOptions($event, options)">
+      <li class="select__item" tabindex="-1" v-for="option in options" :key="option.id" @click="selectOption(option)"
+      >
+        <span class="item__color" :style="{ backgroundColor: option.color }"></span>
         {{ option.label }}
-      </label>
-    </form>
-  </div>
+      </li>
+    </ul>
+  </form>
 </template>
 
 <script>
 export default {
   props: {
+    value: {
+      type: Object, 
+      required: true
+    },
     select: {
       type: Object
     },
@@ -35,8 +41,8 @@ export default {
   data() {
     return {
       title: this.select,
-      areOptionsVisible: false,
-      checked: false
+      areOptionsVisible: true,
+      focusedOption: -1,
     }
   },
   methods: {
@@ -47,7 +53,12 @@ export default {
       if (e.target.type === "checkbox") {
         return;
       }
-      this.toggleSelectVisible();
+      if (e.target.dataset.action === "open" && this.areOptionsVisible) {
+        this.closeOptions();
+        return;
+      }
+      this.toggleSelectVisible()
+
       document.addEventListener("click", this.hideOptions);
     },
     closeOptions() {
@@ -56,22 +67,76 @@ export default {
     },
     changeCheckbox(e) {
       this.$emit("checkbox-checked", e.target.checked)
-      this.checked = e.target.checked
-      if (e.target.checked) {
-        this.title = this.options[0]
-      }
     },
     selectOption(option) {
       this.title = option;
       this.checked = false;
-      this.toggleSelectVisible();
+      this.focusedOption = -1;
+      this.closeOptions();
       this.$emit("select", option);
     },
     hideOptions(e) {
-      if (e.target.dataset.action === "open" || e.target.type === "radio") {
+      if (e.target.dataset.action === "open") {
         return;
       }
       this.closeOptions()
+    },
+    makeElementFocused(parentEl, childIndex) {
+      parentEl.children[childIndex].focus()
+    },
+    navigateByOptions(event, options) {
+      switch (event.code) {
+        case "Enter":
+          this.selectOption(options[this.focusedOption]);
+          break;
+        case "ArrowDown":
+          if (this.focusedOption === - 1) {
+            this.focusedOption = 0;
+            this.makeElementFocused(event.currentTarget, this.focusedOption)
+            return;
+          }
+          if (this.focusedOption === this.options.length - 1) {
+            this.focusedOption = 0;
+            this.makeElementFocused(event.currentTarget, this.focusedOption)
+            return;
+          }
+          this.focusedOption = this.focusedOption + 1;
+          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          break;
+        case "ArrowUp":
+          if (this.focusedOption === - 1) {
+            this.focusedOption = this.options.length - 1;
+            this.makeElementFocused(event.currentTarget, this.focusedOption)
+            return;
+          }
+          if (this.focusedOption === 0) {
+            this.focusedOption = this.options.length - 1;
+            this.makeElementFocused(event.currentTarget, this.focusedOption)
+            return;
+          }
+          this.focusedOption = this.focusedOption - 1;
+          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          break;
+        case "ArrowLeft":
+          this.focusedOption = 0;
+          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          break;
+        case "ArrowRight":
+          this.focusedOption = this.options.length - 1;
+          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          break;
+      
+        default:
+          break;
+      }
+    },
+  },
+  directives: {
+    focus: {
+      inserted: function (el) {
+        el.focus();
+        return;
+      }
     }
   },
 }
@@ -130,6 +195,8 @@ img {
   top: 45%;
   left: 4px;
   transform: translateY(-50%);
+  color: red;
+  background-color: #ffffff;
   border-color: red;
 }
 
@@ -140,8 +207,8 @@ img {
   width: 14px;
   height: 14px;
 
-  /* border: 1px solid; */
-  /* border-color: inherit; */
+  border: 1px solid inherit;
+  border-radius: 2px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -155,6 +222,7 @@ img {
 .title--active {
   margin-left: 32px;
   cursor: pointer;
+  pointer-events: none;
 }
 
 .title__icon {
@@ -166,38 +234,39 @@ img {
   rotate: 45deg;
 }
 
-.select__form {
-  width: 200px;
+.select__list {
+  min-width: 200px;
+  max-width: 400px;
   position: absolute;
-  border: 1px solid gray;
-  border-left: 3px solid gray;
+  /* border: 1px solid gray; */
+  border-radius: 4px;
   z-index: 12;
-  background-color: #fff;
+  background-color: #edecec;
 }
 
-.select__label {
+.select__item {
   display: flex;
   position: relative;
+  text-align: start;
   padding: 8px;
   padding-left: 36px;
   cursor: pointer;
-
+  outline: none;
 }
 
-.select__label:hover,
-.select__label:focus {
+.select__item:hover,
+.select__item:focus {
   background-color: #5ee2ff;
 }
-.select__input{
-  position: absolute;
-  left: 8px;
-}
-.select__input::before {
+.item__color::before {
   content: "";
   position: absolute;
-  left: 0;
-  width: 13px;
-  height: 13px;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
   background-color: inherit;
 }
 </style>
