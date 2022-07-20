@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ProcessSelection :select="options[0]" :options="options" :showCheckbox="showCheckbox"
+    <ProcessSelection v-modal="value" :select="options[0]" :options="options" :showCheckbox="showCheckbox"
       @checkbox-checked="toggleChecked" @select="optionSelect" />
   </div>
 </template>
@@ -15,12 +15,13 @@ export default {
       options: [
         { id: 1, label: 'Accepted', color: '#04ff00', checked: false },
         { id: 2, label: 'In process', color: '#fff700', checked: true },
-        { id: 3, label: 'Rejected', color: '#ff1100', checked: false },
+        { id: 3, label: 'Rejected Lorem ipsum dolor sit, amet consectetur adipisicing elit. Accusantium eligendi eveniet porro optio sed odio rem veniam debitis quia numquam.', color: '#ff1100', checked: false },
         { id: 4, label: 'Postponed', color: '#00fffb', checked: true },
         { id: 5, label: 'Returned', color: '#0015ff', checked: false },
       ],
       showCheckbox: true,
       selectedId: '',
+      value: { id: 2, label: 'In process', color: '#fff700', checked: true },
     }
   },
   methods: {
