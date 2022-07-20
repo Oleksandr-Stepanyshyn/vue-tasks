@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ProcessSelection v-modal="value" :select="options[0]" :options="options" :showCheckbox="showCheckbox"
+    <ProcessSelection :value="value" :options="options" :showCheckbox="showCheckbox"
       @checkbox-checked="toggleChecked" @select="optionSelect" />
   </div>
 </template>
@@ -20,13 +20,13 @@ export default {
         { id: 5, label: 'Returned', color: '#0015ff', checked: false },
       ],
       showCheckbox: true,
-      selectedId: '',
       value: { id: 2, label: 'In process', color: '#fff700', checked: true },
+      title: null,
     }
   },
   methods: {
     optionSelect(option) {
-      this.selectedId = option.id;
+      this.value = option;
     },
     toggleChecked(checked) {
       this.options.forEach(opt => {

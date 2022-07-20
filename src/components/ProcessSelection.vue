@@ -1,18 +1,20 @@
 <template>
   <form class="select">
-    <div class="select__title" tabindex="-1" :style="{ backgroundColor: title.color, borderColor: title.color }"
+    <div class="select__title" tabindex="-1" :style="{ backgroundColor: value.color, borderColor: value.color }"
       @click="openOptions" @keydown.enter="openOptions" data-action="open">
       <input class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox"
-        :style="{ borderColor: title.color }" @change="changeCheckbox" />
-      <p class="title--active">{{ title.label }}</p>
+        :style="{ borderColor: value.color }" @change="changeCheckbox" />
+      <p class="title--active">
+        {{ value.label }}
+      </p>
       <svg class="title__icon" width="14" height="14">
         <use href="@/images/sprite.svg#icon-arrow-down"></use>
       </svg>
     </div>
     <ul class="select__list" role="select" tabindex="0" v-if="areOptionsVisible" v-focus @click="closeOptions"
       @keydown="navigateByOptions($event, options)">
-      <li class="select__item" tabindex="-1" v-for="option in options" :key="option.id" @click="selectOption(option)"
-      >
+      <li class="select__item" role="option" tabindex="-1" v-for="option in options" :key="option.id"
+        @click="selectOption(option)">
         <span class="item__color" :style="{ backgroundColor: option.color }"></span>
         {{ option.label }}
       </li>
@@ -22,12 +24,9 @@
 
 <script>
 export default {
+  name: 'process-selection',
   props: {
     value: {
-      type: Object, 
-      required: true
-    },
-    select: {
       type: Object
     },
     options: {
@@ -40,8 +39,8 @@ export default {
   },
   data() {
     return {
-      title: this.select,
-      areOptionsVisible: true,
+      title: this.value,
+      areOptionsVisible: false,
       focusedOption: -1,
     }
   },
@@ -74,6 +73,7 @@ export default {
       this.focusedOption = -1;
       this.closeOptions();
       this.$emit("select", option);
+      this.$emit("submit", option);
     },
     hideOptions(e) {
       if (e.target.dataset.action === "open") {
@@ -241,7 +241,8 @@ img {
   /* border: 1px solid gray; */
   border-radius: 4px;
   z-index: 12;
-  background-color: #edecec;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
 }
 
 .select__item {
@@ -254,7 +255,10 @@ img {
   outline: none;
 }
 
-.select__item:hover,
+.select__item:hover{
+  background-color: #edecec;
+}
+
 .select__item:focus {
   background-color: #5ee2ff;
 }
