@@ -1,18 +1,21 @@
 <template>
   <form class="select">
-    <div class="select__title" tabindex="-1" :style="{ backgroundColor: title.color, borderColor: title.color }"
+    <div class="select__title" tabindex="-1" :style="{ backgroundColor: value.color, borderColor: value.color }"
       @click="openOptions" @keydown.enter="openOptions" data-action="open">
       <input class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox"
-        :style="{ borderColor: title.color }" @change="changeCheckbox" />
-      <p class="title--active">{{ title.label }}</p>
-      <svg class="title__icon" width="14" height="14">
+        :style="{ borderColor: value.color }" @change="changeCheckbox" />
+      <p class="title--active">
+        {{ value.label }}
+      </p>
+      <svg class="title__icon" :class="{open: areOptionsVisible}" width="14" height="14">
         <use href="@/images/sprite.svg#icon-arrow-down"></use>
       </svg>
     </div>
-    <ul class="select__list" role="select" tabindex="0" v-if="areOptionsVisible" v-focus @click="closeOptions"
-      @keydown="navigateByOptions($event, options)">
-      <li class="select__item" tabindex="-1" v-for="option in options" :key="option.id" @click="selectOption(option)"
-      >
+    <ul class="select__list" role="select" tabindex="0"
+      :style="{ minWidth: minWidthList + 'px', maxWidth: maxWidthList+'px' }" v-if="areOptionsVisible"
+      @click="closeOptions" @keydown="navigateByOptions($event, options)">
+      <li class="select__item" role="option" tabindex="-1" v-for="(option, idx) in options" :key="option.id"
+        v-focus="idx === focusedOptionIndex" @click="selectOption(option)">
         <span class="item__color" :style="{ backgroundColor: option.color }"></span>
         {{ option.label }}
       </li>
@@ -21,13 +24,15 @@
 </template>
 
 <script>
+
 export default {
+  name: 'process-selection',
+  model: {
+    prop: 'value',
+    event: 'select'
+  },
   props: {
     value: {
-      type: Object, 
-      required: true
-    },
-    select: {
       type: Object
     },
     options: {
@@ -36,19 +41,29 @@ export default {
     },
     showCheckbox: {
       type: Boolean,
-    }
+    },
+    minWidthList: {
+      type: Number,
+      default: 200,
+    },
+    maxWidthList: {
+      type: Number,
+      default: 400,
+    },
   },
   data() {
     return {
-      title: this.select,
-      areOptionsVisible: true,
-      focusedOption: -1,
+      areOptionsVisible: false,
+      focusedOptionIndex: -1,
     }
   },
   methods: {
     toggleSelectVisible() {
       this.areOptionsVisible = !this.areOptionsVisible;
     },
+    findAndSetFocusedOption(options, value) {
+      this.focusedOptionIndex =options.findIndex(({ id }) => id === value.id);
+    } ,
     openOptions(e) {
       if (e.target.type === "checkbox") {
         return;
@@ -69,10 +84,8 @@ export default {
       this.$emit("checkbox-checked", e.target.checked)
     },
     selectOption(option) {
-      this.title = option;
-      this.checked = false;
-      this.focusedOption = -1;
       this.closeOptions();
+      this.findAndSetFocusedOption(this.options, option);
       this.$emit("select", option);
     },
     hideOptions(e) {
@@ -87,43 +100,46 @@ export default {
     navigateByOptions(event, options) {
       switch (event.code) {
         case "Enter":
-          this.selectOption(options[this.focusedOption]);
+          this.selectOption(options[this.focusedOptionIndex]);
           break;
         case "ArrowDown":
-          if (this.focusedOption === - 1) {
-            this.focusedOption = 0;
-            this.makeElementFocused(event.currentTarget, this.focusedOption)
+          if (this.focusedOptionIndex === - 1) {
+            this.focusedOptionIndex = 0;
+            this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
             return;
           }
-          if (this.focusedOption === this.options.length - 1) {
-            this.focusedOption = 0;
-            this.makeElementFocused(event.currentTarget, this.focusedOption)
+          if (this.focusedOptionIndex === this.options.length - 1) {
+            this.focusedOptionIndex = 0;
+            this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
             return;
           }
-          this.focusedOption = this.focusedOption + 1;
-          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          this.focusedOptionIndex = this.focusedOptionIndex + 1;
+          this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
           break;
         case "ArrowUp":
-          if (this.focusedOption === - 1) {
-            this.focusedOption = this.options.length - 1;
-            this.makeElementFocused(event.currentTarget, this.focusedOption)
+          if (this.focusedOptionIndex === - 1) {
+            this.focusedOptionIndex = this.options.length - 1;
+            this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
             return;
           }
-          if (this.focusedOption === 0) {
-            this.focusedOption = this.options.length - 1;
-            this.makeElementFocused(event.currentTarget, this.focusedOption)
+          if (this.focusedOptionIndex === 0) {
+            this.focusedOptionIndex = this.options.length - 1;
+            this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
             return;
           }
-          this.focusedOption = this.focusedOption - 1;
-          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          this.focusedOptionIndex = this.focusedOptionIndex - 1;
+          this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
           break;
         case "ArrowLeft":
-          this.focusedOption = 0;
-          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          this.focusedOptionIndex = 0;
+          this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
           break;
         case "ArrowRight":
-          this.focusedOption = this.options.length - 1;
-          this.makeElementFocused(event.currentTarget, this.focusedOption)
+          this.focusedOptionIndex = this.options.length - 1;
+          this.makeElementFocused(event.currentTarget, this.focusedOptionIndex)
+          break;
+        case "Escape":
+          this.closeOptions();
           break;
       
         default:
@@ -133,12 +149,17 @@ export default {
   },
   directives: {
     focus: {
-      inserted: function (el) {
-        el.focus();
+      inserted: function (el, binding) {
+        if (binding.value) {
+          el.focus()
+        }
         return;
       }
     }
   },
+  mounted() {
+    this.findAndSetFocusedOption(this.options, this.value);
+  }
 }
 </script>
 
@@ -195,9 +216,6 @@ img {
   top: 45%;
   left: 4px;
   transform: translateY(-50%);
-  color: red;
-  background-color: #ffffff;
-  border-color: red;
 }
 
 .custom-checkbox::before {
@@ -228,6 +246,11 @@ img {
 .title__icon {
   margin-right: 12px;
   pointer-events: none;
+  /* transition: all 0.3s ease-out; */
+}
+
+.title__icon.open {
+  transform: rotate(180deg);
 }
 
 .select__title:target .title__icon{
@@ -241,7 +264,8 @@ img {
   /* border: 1px solid gray; */
   border-radius: 4px;
   z-index: 12;
-  background-color: #edecec;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
 }
 
 .select__item {
@@ -254,7 +278,10 @@ img {
   outline: none;
 }
 
-.select__item:hover,
+.select__item:hover{
+  background-color: #edecec;
+}
+
 .select__item:focus {
   background-color: #5ee2ff;
 }
