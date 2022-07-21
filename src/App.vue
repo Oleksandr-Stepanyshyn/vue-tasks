@@ -22,7 +22,7 @@ export default {
         { id: 4, label: 'Postponed Lorem ipsum dolor sit, amet consectetur adipisicing elit. Accusantium eligendi eveniet porro optio sed odio rem veniam debitis quia numquam.', color: '#00fffb', checked: true },
         { id: 5, label: 'Returned', color: '#0015ff', checked: false },
       ],
-      showCheckbox: false,
+      showCheckbox: true,
       value: { id: 2, label: 'In process', color: '#fff700', checked: true },
     }
   },

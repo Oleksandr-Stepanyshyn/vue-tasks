@@ -11,7 +11,7 @@
           </svg>
         </span>
       </label>
-      <p class="title__text" placeholder="Please select">
+      <p class="title__text">
         {{ value.label || "Please select" }}
       </p>
       <svg class="title__arrow" :class="{open: areOptionsVisible}" width="14" height="14">
