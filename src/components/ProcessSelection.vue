@@ -2,17 +2,17 @@
   <form class="select">
     <div class="select__title" tabindex="0" :style="{ backgroundColor: value.color, borderColor: value.color }"
       @click="openOptions" @keydown.enter="openOptions" data-action="open">
-      <input id="checkbox" class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox"
+      <input id="checkbox" class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox && hasValue"
         @change="changeCheckbox" />
-      <label class="checkbox__label" v-if="showCheckbox" for="checkbox">
+      <label class="checkbox__label" v-if="showCheckbox && hasValue" for="checkbox">
         <span class="checkbox__icon" :style="{ borderColor: value.color }">
           <svg width="14" height="14">
             <use href="@/images/sprite.svg#icon-check"></use>
           </svg>
         </span>
       </label>
-      <p class="title__text">
-        {{ value.label }}
+      <p class="title__text" placeholder="Please select">
+        {{ value.label || "Please select" }}
       </p>
       <svg class="title__arrow" :class="{open: areOptionsVisible}" width="14" height="14">
         <use href="@/images/sprite.svg#icon-arrow-down"></use>
@@ -20,7 +20,7 @@
     </div>
     <ul class="select__list" role="select" tabindex="0"
       :style="{ minWidth: minWidthList + 'px', maxWidth: maxWidthList+'px' }" v-if="areOptionsVisible"
-      @click="closeOptions" @keydown="navigateByOptions($event, options)">
+      @click="closeOptions" @keydown="navigateByOptions($event, options)" v-focus="!hasValue">
       <li class="select__item" role="option" tabindex="-1" v-for="(option, idx) in options" :key="option.id"
         v-focus="idx === focusedOptionIndex" @click="selectOption(option)">
         <span class="item__color" :style="{ backgroundColor: option.color }"></span>
@@ -64,12 +64,19 @@ export default {
       focusedOptionIndex: -1,
     }
   },
+  computed: {
+    hasValue: function () {
+      const arrayKeys = Object.keys(this.value);
+      const Bool = arrayKeys.includes("id");
+      return Bool;
+    }
+  },
   methods: {
     toggleSelectVisible() {
       this.areOptionsVisible = !this.areOptionsVisible;
     },
     findAndSetFocusedOption(options, value) {
-      this.focusedOptionIndex =options.findIndex(({ id }) => id === value.id);
+      this.focusedOptionIndex = options.findIndex(({ id }) => id === value.id);
     } ,
     openOptions(e) {
       if (e.target.type === "checkbox") {
