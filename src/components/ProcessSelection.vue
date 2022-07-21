@@ -199,6 +199,7 @@ img {
 }
 
 .select {
+  min-width: 160px;
   width: 100%;
   position: relative;
 }

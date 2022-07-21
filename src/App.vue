@@ -56,7 +56,7 @@ export default {
 }
 
 .select__container {
-  width: 250px;
+  width: 500px;
   text-align: center;
 }
 </style>
