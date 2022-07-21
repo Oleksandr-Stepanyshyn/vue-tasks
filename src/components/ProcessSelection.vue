@@ -2,7 +2,8 @@
   <form class="select">
     <div class="select__title" tabindex="0" :style="{ backgroundColor: value.color, borderColor: value.color }"
       @click="openOptions" @keydown.enter="openOptions" data-action="open">
-      <input id="checkbox" class="custom-checkbox" name="checkbox" type="checkbox" @change="changeCheckbox" />
+      <input id="checkbox" class="custom-checkbox" name="checkbox" type="checkbox" v-if="showCheckbox"
+        @change="changeCheckbox" />
       <label class="checkbox__label" v-if="showCheckbox" for="checkbox">
         <span class="checkbox__icon" :style="{ borderColor: value.color }">
           <svg width="14" height="14">
@@ -200,7 +201,7 @@ img {
 
 .select {
   min-width: 160px;
-  width: 100%;
+  max-width: 400px;
   position: relative;
 }
 
