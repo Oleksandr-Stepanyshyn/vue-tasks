@@ -110,6 +110,16 @@ describe('ProcessSelection', () => {
     expect(wrapper.vm.focusedOptionIndex).toBe(-1);
   });
 
+  test('check if there is an input value "value"', () => {
+    const props = {
+      options,
+      showCheckbox: true,
+      value: { id: 1, label: 'Accepted', color: '#04ff00', checked: false },
+    };
+
+    expect(ProcessSelection.computed.hasValue.call(props)).toBe(true);
+  });
+
   test('"click" on a title can rewrite data areOptionsVisible = true', async () => {
     const wrapper = mount(ProcessSelection, {
       propsData: {
@@ -180,5 +190,28 @@ describe('ProcessSelection', () => {
     await option.trigger('click');
 
     expect(wrapper.vm.focusedOptionIndex).toBe(2);
+  });
+
+  test('"click" on a options[2] from select__list remove title text on "Rejected"', async () => {
+    const wrapper = mount(ProcessSelection, {
+      propsData: {
+        options,
+        showCheckbox: true,
+        value: { id: 2, label: 'In process', color: '#fff700', checked: true },
+      },
+    });
+
+    let title = wrapper.findComponent('.title__text');
+
+    await title.trigger('click');
+
+    const option = wrapper.findAll('.select__item').at(2);
+
+    await option.trigger('click');
+
+    wrapper.vm.$nextTick(() => {
+      expect(wrapper.findComponent('.title__text').text()).toBe('Rejected');
+      // done();
+    });
   });
 });
